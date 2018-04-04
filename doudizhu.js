@@ -37,8 +37,8 @@ cc.Class({
                 "_RNo": "710423", //房间号
                 "_TN": 1, //局数
                 "_Step": 1, //步数
-                "_IsEG": false, //是否结束游戏
-                "_IsSG": true, //是否开始游戏
+                "_IsEG": false, //桌子是否结束游戏
+                "_IsSG": true, //房间是否开始游戏
                 "_GOM": { //玩法
                     "count": "1",
                     "playtype": "default",
@@ -281,6 +281,13 @@ cc.Class({
         //斗地主
         if (cc.sys.localStorage.getItem("status") !== "false") { //亲友场
             this._obj.tablebtn._active = false;
+        } else {
+            this._obj.tablebtn._active = true;
+            this._obj.tablebtn.cancel_btn = false;
+            this._obj.tablebtn.start_btn = false;
+            this._obj.tablebtn.share_btn = true;
+            this._obj.tablebtn.takegold_btn = false;
+            this._obj.tablefoot._active = false;
         }
         if (cc.sys.localStorage.getItem("playerpool") !== "false") {
             this._obj.tablebtn._active = true;

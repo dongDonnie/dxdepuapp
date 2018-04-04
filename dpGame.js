@@ -378,16 +378,14 @@ cc.Class({
         this.node.on(_eventList.room.EventName, function (data) {
             // var _flag = isNextStep(data);
             if (data.detail._IsS) {
-                console.log("玩家入座成功");
+                console.log("room重载成功");
+                cc.sys.localStorage.setItem("_Step", data.detail._Data._Step);
+                var _data = self.gameService.init(data.detail._Data);
                 if (data.detail._Data._Step === 1) {
                     // cc.MJ.common.sound.playSoud("sound_start");
                     // self.RoomModel.game.inpai._active = false;
                     self.paiActionfunc();
                 }
-                cc.sys.localStorage.setItem("_Step", data.detail._Data._Step);
-                var _data = self.gameService.init(data.detail._Data);
-
-
                 // self.gameService.initTableBtn(data.detail._Data);
             } else {
                 // cc.MJ.alert.tips_msg(data.detail._EMsg);
@@ -873,11 +871,7 @@ cc.Class({
         console.log(setting.getComponent("roomsetting"));
         setting.getComponent("roomsetting").setMgr(this);
     },
-    //退出设置界面
-    exitSetting: function () {
-        this.playOutAni(this.settingbox, 0.3);
-    },
-
+    
     //呼出带入金币界面
     bringInMoney: function (table,num) {
         // var bringin = this.dialog.getChildByName('bringin_money');
@@ -892,18 +886,7 @@ cc.Class({
         this.bringNum = 0;
         bringin.getComponent('bringInCoin').setMgr(this, table, num);
     },
-    //退出带入金币界面
-    exitBringIn: function () {
-        var bringin = this.dialog.getChildByName('bringin_money');
-        this.playOutAni(bringin, 0.3);
-    },
-    //选择带入金币数
-    bringInNum: function () {
-        var slider = cc.find('bringin_money/jifen_layout', this.dialog);
-        var num = Math.floor(slider.getChildByName('jifen_slider').getComponent(cc.Slider).progress * this.myInfo._GC);
-        slider.getChildByName('jifen_count').getComponent(cc.Label).string = num;
-    },
-
+    
     //呼出玩法界面
     playRule: function () {
         if (cc.find("playrule", this.dialog) != null) {
@@ -1216,7 +1199,7 @@ cc.Class({
         // 重复次数
         var repeat = painode.length - 4;
         // 开始延时
-        var delay = 0;
+        var delay = 0.5;
         var scode = 0;
         this.schedule(function () {
             var moveto_action = cc.moveTo(0.2, cc.p(74.5+scode * 54, painode[code].y));

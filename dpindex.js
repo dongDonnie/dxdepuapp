@@ -52,6 +52,41 @@ cc.Class({
         this.initEvent();
         this.clickbtn = null;
         this.mainFaceBtn(null, 'gameMenu');
+        // this.addScaleControl();
+    },
+
+    addScaleControl: function () { //放大缩小操作
+        var maxS = 1.5;
+        var minS = 0.5;
+        if (cc.sys.isMobile) {
+            this.node.on("touchmove", function (event) {
+                var touches = event.getTouches();
+                if (touch.length >= 2) {
+                    var touch1 = touches[1], touch2 = touches[1];
+                    var delta1 = touch1.getDelta(), delta2 = touch2.getDelta();
+                    var touchPoint1 = this.node.convertToNodeSpaceAR(touch1.getLocation());
+                    var touchPoint2 = this.node.convertToNodeSpaceAR(touch2.getLocation());
+                    var distance = cc.pSub(touchPoint1, touchPoint2);
+                    var delta = cc.pSub(delta1, delta2);
+                    var scale = 1;
+                    if (Math.abs(distance.x) > Math.abs(distance.y)) {
+                        scale = (distance.x + delta.x) / distance.x * this.node.scale;
+                    } else {
+                        scale = (distance.y + delta.y) / distance.y * this.node.scale;
+                    }
+                    this.node.scale = cc.clampf(scale, minS, maxS);
+                }
+            }, this)
+        } else {
+            this.node.on("mousewheel", function (event) {
+                if (event.getScrollY() > 0) {
+                    event.currentTarget.scale += 0.01;
+                } else {
+                    event.currentTarget.scale -= 0.01;
+                }
+                event.currentTarget.scale = cc.clampf(event.currentTarget.scale, minS, maxS);
+            })
+        }
     },
 
     tuserData: function (data) {

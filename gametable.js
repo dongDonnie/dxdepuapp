@@ -20,17 +20,29 @@ cc.Class({
         });
         this.roomrule = JSON.parse(cc.MJ.data.getLocalStorage_roomRule());
         this.roomNum = cc.MJ.data.getLocalStorage_roomNo();
-        this.GameType={};
+        this.GameType = {};
         this._reset();
     },
 
     _reset: function () {
         // TODO 根据游戏类型重新赋值该变量
         this._paiNum = {
-            pai0: {Current: [], Drop: []},
-            pai1: {Current: [], Drop: []},
-            pai2: {Current: [], Drop: []},
-            pai3: {Current: [], Drop: []}
+            pai0: {
+                Current: [],
+                Drop: []
+            },
+            pai1: {
+                Current: [],
+                Drop: []
+            },
+            pai2: {
+                Current: [],
+                Drop: []
+            },
+            pai3: {
+                Current: [],
+                Drop: []
+            }
         };
         cc.sys.localStorage.setItem("_Step", "0");
 
@@ -85,31 +97,13 @@ cc.Class({
         }
 
         if (p_obj._RSTime === null) {
-            this._obj.roomTime._active=false;
+            this._obj.roomTime._active = false;
             // this.seatObj._active = false;
         } else {
             this.seatObj._active = true;
             var startTime = p_obj._RSTime;
-            startTime = new Date(startTime).getTime();
-            var endTime = Number(startTime) + Number(roomrule.gametime) * 60 * 1000;
-            this.sI = setInterval(() => {
-                var now = new Date().getTime();
-                if (now > endTime) {
-                    clearInterval(this.sI);
-                    this._obj.roomTime.time_m = "00:00:00";
-                } else {
-                    var zongmiao = (endTime - now) / 1000;
-                    var shi = Math.floor(zongmiao / 3600);
-                    var fen = Math.floor((zongmiao - shi * 3600) / 60);
-                    var miao = Math.floor((zongmiao - shi * 3600 - fen * 60));
-                    var lab = (shi < 10 ? "0" + shi : shi) + ":" + (fen < 10 ? "0" + fen : fen) + ":" + (miao < 10 ? "0" + miao : miao);
-                    if (this._obj == undefined) {
-                        clearInterval(this.sI);
-                        return;
-                    }
-                    this._obj.roomTime.time_m = lab;
-                }
-            }, 1000);
+            var durtion = roomrule.gametime;
+            this.countDown(startTime, durtion);
         }
         if (p_obj._IsSG) {
             this._obj.tablebtn._active = false;
@@ -134,8 +128,7 @@ cc.Class({
                 _mySeat = _seat_obj;
 
             }
-            if (p_obj._IsSG) {
-
+            if (p_obj._IsSG && !p_obj._IsEG) {
                 // this.roomObj.game.time._active=true;
                 this.paiObj._active = true;
                 var _clist = _seat_obj._CCC;
@@ -161,7 +154,7 @@ cc.Class({
                     this._setCenterNum(_seat_obj._SNo);
                 }
                 _tempPaiNum.Drop = _dlist;
-                if (_seat_obj._SNo === 0) {
+                if (_seat_obj._SNo === 0 && _clist != null) {
                     _clist.sort(function (a, b) {
                         return b % 20 - a % 20;
                     });
@@ -170,7 +163,7 @@ cc.Class({
 
                 _seat_bindObj.head.isReady = false;
                 this.seatObj.seat0._active = false;
-                _tempPaiNum.Current = _clist;
+                _tempPaiNum.Current = _clist||[];
                 this.initCurrentPaiOBJ(_seat_obj._SNo, p_obj._IsEG);
                 this.initPlayedCard(_seat_obj._SNo);
 
@@ -211,9 +204,37 @@ cc.Class({
         }
     },
 
-    initSettingBtn: function (data) { 
+    /**
+     * 倒计时  开始时间  时长
+     */
+    countDown: function (startTime, durtion) {
+        startTime = new Date(startTime).getTime();
+        var endTime = Number(startTime) + Number(durtion) * 60 * 1000;
+        this.sI = setInterval(() => {
+            var now = new Date().getTime();
+            if (now > endTime) {
+                clearInterval(this.sI);
+                if (this._obj == undefined) {
+                    return;
+                }
+                this._obj.roomTime.time_m = "00:00:00";
+            } else {
+                var zongmiao = (endTime - now) / 1000;
+                var shi = Math.floor(zongmiao / 3600);
+                var fen = Math.floor((zongmiao - shi * 3600) / 60);
+                var miao = Math.floor((zongmiao - shi * 3600 - fen * 60));
+                var lab = (shi < 10 ? "0" + shi : shi) + ":" + (fen < 10 ? "0" + fen : fen) + ":" + (miao < 10 ? "0" + miao : miao);
+                if (this._obj == undefined) {
+                    return;
+                }
+                this._obj.roomTime.time_m = lab;
+            }
+        }, 1000);
+    },
+
+    initSettingBtn: function (data) {
         if (data._POW) { //入座玩家
-            
+
         }
     },
 
@@ -243,7 +264,10 @@ cc.Class({
         }
 
         var _list = this._paiNum["pai" + p_SeatNo].Current;
-        return {p_obj: p_obj, _list: _list};
+        return {
+            p_obj: p_obj,
+            _list: _list
+        };
     },
 
     selectPoker: function (p_select_list) {
@@ -266,8 +290,7 @@ cc.Class({
                         _index = k + 1;
                         p_select_list.splice(k, 1);
                         break;
-                    } else {
-                    }
+                    } else {}
 
 
                 }
@@ -344,7 +367,7 @@ cc.Class({
                 if (p_IsSG) {
                     _obj._active = true;
                     // _obj._sprite = cc.MJ.common.resources.getSpriteFrameByName("poker", "p" + p_arr[i]);
-                    cc.MJ.common.ui.UrlLoadImage(_obj,"dp/niuniu/poker_back.png")
+                    cc.MJ.common.ui.UrlLoadImage(_obj, "dp/niuniu/poker_back.png")
                 } else {
                     _obj._active = false;
                     _obj._sprite = new cc.SpriteFrame();
@@ -370,14 +393,20 @@ cc.Class({
             _obj._y = _obj._oldy;
             if (_list.length > i) {
                 _obj._active = true;
-                _obj._button = {_EventData: _list[i], _EventID: 0};
+                _obj._button = {
+                    _EventData: _list[i],
+                    _EventID: 0
+                };
                 // console.log("进来加载牌");
                 // console.log(_list[i]);
                 _obj._color = cc.Color.WHITE;
                 _obj._sprite = cc.MJ.common.resources.getSpriteFrameByName("poker", "p" + _list[i]);
                 continue;
             }
-            _obj._button = {_EventData: "0", _EventID: 0};
+            _obj._button = {
+                _EventData: "0",
+                _EventID: 0
+            };
             _obj._active = false;
             _obj._sprite = new cc.SpriteFrame();
 
@@ -396,7 +425,10 @@ cc.Class({
         var _list = this._paiNum["pai" + p_SeatNo].Drop;
         // if (_list.length > 0) {
 
-        var _param = {p_obj: p_obj, p_list: _list};
+        var _param = {
+            p_obj: p_obj,
+            p_list: _list
+        };
         this._DropInit(_param);
         p_obj._active = true;
         // } 
@@ -477,7 +509,7 @@ cc.Class({
         if (pt !== "null" && pt !== "undefined") {
             this.roomrule.playtype = pt;
         }
-        this._obj.tableinfo.roomtype_m=this.GameType[this.roomrule.playtype];
+        this._obj.tableinfo.roomtype_m = this.GameType[this.roomrule.playtype];
         // this._obj.tableinfo.rule_m = "封顶倍数  " + this.roomrule.maxtimes + "  入场门槛  " + this.roomrule.mingold + "  最小带入  " + this.roomrule.playermingold + "\n房间号：" + this.roomNum;
 
         //初始化玩法界面
@@ -530,7 +562,7 @@ cc.Class({
      */
     joinRoom: function (p_obj) {
         var _seat_bindObj = this.seatObj["seat" + p_obj._SNo];
-        if(p_obj._Fg){
+        if (p_obj._Fg) {
             this._hasseat.push(p_obj._SNo);
             p_obj._IsReady = 1;
             p_obj._IsN = true;
@@ -540,7 +572,7 @@ cc.Class({
                 this._obj.tablebtn._active = false;
             }
         } else {
-            for (let i = 0; i < this._hasseat.length; i++){
+            for (let i = 0; i < this._hasseat.length; i++) {
                 if (this._hasseat[i]._SNo == p_obj._SNo) {
                     this._hasseat.splice(i, 1);
                 }
@@ -599,7 +631,7 @@ cc.Class({
             self.finishObj._active = true;
 
             // self.finishObj.rule_m = "规则：" + self.GameType[self.roomrule.playtype];
-            for (let i = 0; i < 3; i++){
+            for (let i = 0; i < 3; i++) {
                 self.initPlayedCard(i);
             }
             for (var i = 0; i < this.toppaiObj.length; i++) {
